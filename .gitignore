@@ -1,9 +1,7 @@
 __pycache__/
 
-# Saved games
 *.sav
 
-# Pyton Env Config
 pyvenv.cfg
 
-README.txt
+dev_notes.txt
