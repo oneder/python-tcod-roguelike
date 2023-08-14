@@ -1,0 +1,7 @@
+# Saved games
+*.sav
+
+# Pyton Env Config
+pyvenv.cfg
+
+README.txt
