@@ -1,3 +1,5 @@
+from configparser import ConfigParser
+
 from src.components.ai import HostileEnemy
 from src.components import consumable, equipable
 from src.components.equipment import Equipment
@@ -6,75 +8,108 @@ from src.components.inventory import Inventory
 from src.components.level import Level
 from src.entity import Actor, Item
 
+import src.color as color
+
+config = ConfigParser()
+config.read("config.ini")
+
+""" ACTORS """
+
 player = Actor(
     char="@",
-    color=(255, 255, 255),
+    color=color.player_alive,
     name="Player",
     ai_cls=HostileEnemy,
     equipment=Equipment(),
-    fighter=Fighter(hp=30, base_defense=2, base_power=5),
-    inventory=Inventory(capacity=26),
-    level=Level(level_up_base=200),
+    fighter=Fighter(
+        hp=30, 
+        base_defense=2, 
+        base_power=5, 
+        base_attack_speed=int(config.get("GAME INFO", "PLAYER_ATTACK_SPEED"))
+    ),
+    inventory=Inventory(capacity=int(config.get("GAME INFO", "DEFAULT_INVENTORY_CAPACITY"))),
+    level=Level(level_up_base=int(config.get("GAME INFO", "DEFAULT_LEVEL_UP_BASE"))),
+    speed=int(config.get("GAME INFO", "PLAYER_SPEED")),
 )
 
 orc = Actor(
     char="o", 
-    color=(63, 127, 63), 
+    color=color.orc_alive, 
     name="Orc", 
     ai_cls=HostileEnemy,
     equipment=Equipment(),
-    fighter=Fighter(hp=10, base_defense=0, base_power=3),
+    fighter=Fighter(
+        hp=10, 
+        base_defense=0, 
+        base_power=3, 
+        base_attack_speed=int(config.get("GAME INFO", "DEFAULT_ATTACK_SPEED"))
+    ),
     inventory=Inventory(capacity=0),
     level=Level(xp_given=35),
+    speed=int(config.get("GAME INFO", "DEFAULT_SPEED")),
 )
 
 troll = Actor(
     char="T", 
-    color=(0, 127, 0), 
+    color=color.troll_alive, 
     name="Troll",
     ai_cls=HostileEnemy,
     equipment=Equipment(),
-    fighter=Fighter(hp=15, base_defense=1, base_power=4),
+    fighter=Fighter(
+        hp=15, 
+        base_defense=1, 
+        base_power=4, 
+        base_attack_speed=int(config.get("GAME INFO", "DEFAULT_ATTACK_SPEED"))
+    ),
     inventory=Inventory(capacity=0),
-    level=Level(xp_given=100)
+    level=Level(xp_given=100),
+    speed=int(config.get("GAME INFO", "DEFAULT_SPEED")),
 )
+
+""" POTIONS """
 
 health_potion = Item(
     char="!",
-    color=(127, 0, 255),
+    color=color.health_potion,
     name="Health Potion",
     consumable=consumable.HealingConsumable(amount=4),
 )
 
-lightning_scroll = Item(
-    char="~",
-    color=(255, 255, 0),
-    name="Lightning Scroll",
-    consumable=consumable.LightningDamageConsumable(damage=20, maximum_range=5),
-)
-
-dagger = Item(char="/", color=(0, 191, 255), name="Dagger", equipable=equipable.Dagger())
-sword = Item(char="/", color=(0, 191, 255), name="Sword", equipable=equipable.Sword())
-
-leather_armor = Item(
-    char="[",
-    color=(139, 69, 19),
-    name="Leather Armor",
-    equipable=equipable.LeatherArmor(),
-)
-
-chain_mail = Item(char="[", color=(139, 19, 19), name="Chain Mail", equipable=equipable.ChainMail())
+""" SCROLLS """
 
 confusion_scroll = Item(
     char="~",
-    color=(207, 63, 255),
+    color=color.confusion_scroll,
     name="Confusion Scroll",
     consumable=consumable.ConfusionConsumable(number_of_turns=10)
 )
 
+lightning_scroll = Item(
+    char="~",
+    color=color.lightning_scroll,
+    name="Lightning Scroll",
+    consumable=consumable.LightningDamageConsumable(damage=20, maximum_range=5),
+)
+
 fireball_scroll = Item(
     char="~",
-    color=(255, 0, 0),
+    color=color.fireball_scroll,
     name="Fireball Scroll",
     consumable=consumable.FireballDamageConsumable(damage=12, radius=3),
 )
+
+""" WEAPONS """
+
+dagger = Item(char="/", color=color.dagger, name="Dagger", equipable=equipable.Dagger())
+sword = Item(char="/", color=color.sword, name="Sword", equipable=equipable.Sword())
+
+""" EQUIPMENT """
+
+leather_armor = Item(
+    char="[",
+    color=color.leather_armor,
+    name="Leather Armor",
+    equipable=equipable.LeatherArmor(),
+)
+
+chain_mail = Item(char="[", color=color.chain_mail, name="Chain Mail", equipable=equipable.ChainMail())

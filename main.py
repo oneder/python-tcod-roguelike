@@ -1,11 +1,17 @@
 import traceback
 
+import time
 import tcod
+
+from configparser import ConfigParser
 
 import src.color as color
 import src.exceptions as exceptions
 import src.input_handlers as input_handlers
 import src.setup_game as setup_game
+
+config = ConfigParser()
+config.read("config.ini")
 
 def save_game(handler: input_handlers.BaseEventHandler, filename: str) -> None:
     # if the current event handler has an active Engine then save it
@@ -14,11 +20,14 @@ def save_game(handler: input_handlers.BaseEventHandler, filename: str) -> None:
         print("Game saved.")
 
 def main():
-    screen_width = 80
-    screen_height = 50
+    screen_width = int(config.get("GAME INFO", "SCREEN_WIDTH"))
+    screen_height = int(config.get("GAME INFO", "SCREEN_HEIGHT"))
 
     tileset = tcod.tileset.load_tilesheet(
-        "rouge_imgfile.png", 32, 8, tcod.tileset.CHARMAP_TCOD
+        config.get("GAME INFO", "TILESHEET_PATH"), 
+        int(config.get("GAME INFO", "TILESHEET_COLUMNS")), 
+        int(config.get("GAME INFO", "TILESHEET_ROWS")), 
+        tcod.tileset.CHARMAP_TCOD
     )
 
     handler: input_handlers.BaseEventHandler = setup_game.MainMenu()
@@ -27,7 +36,7 @@ def main():
        screen_width,
        screen_height,
        tileset=tileset,
-       title="Roog Tuts",
+       title=config.get("GAME INFO", "TITLE"),
        vsync=True, 
     ) as context:
         root_console = tcod.console.Console(screen_width, screen_height, order="F")
@@ -38,9 +47,17 @@ def main():
                 context.present(root_console)
 
                 try:
-                    for event in tcod.event.wait():
+                    for event in tcod.event.get():
                         context.convert_event(event)
                         handler = handler.handle_events(event)
+                    
+                    if isinstance(handler, input_handlers.EventHandler):
+                        if handler.engine.player.wait > 0:
+                            handler.engine.player.wait -= 1
+                            
+                        handler.engine.handle_enemy_turns()
+
+                    time.sleep(1/60)
                 except Exception: # handle exceptions in game
                     traceback.print_exc() # print error to stderr
 

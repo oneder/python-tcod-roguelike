@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from configparser import ConfigParser
 from typing import Tuple, TYPE_CHECKING
 
 import src.color as color
@@ -8,6 +9,9 @@ if TYPE_CHECKING:
     from tcod import Console
     from engine import Engine
     from game_map import GameMap
+
+config = ConfigParser()
+config.read("config.ini")
 
 def get_names_at_location(x: int, y: int, game_map: GameMap) -> str:
     if not game_map.in_bounds(x, y) or not game_map.visible[x, y]:
@@ -22,17 +26,34 @@ def get_names_at_location(x: int, y: int, game_map: GameMap) -> str:
 def render_bar(
     console: Console, current_value: int, maximum_value: int, total_width: int
 ) -> None:
+    bar_x = int(config.get("GAME INFO", "HP_BAR_X"))
+    bar_y = int(config.get("GAME INFO", "HP_BAR_Y"))
     bar_width = int(float(current_value) / maximum_value * total_width)
 
-    console.draw_rect(x=0, y=45, width=total_width, height=1, ch=1, bg=color.bar_empty)
+    console.draw_rect(
+        x=bar_x, 
+        y=bar_y, 
+        width=total_width, 
+        height=1, 
+        ch=1, 
+        bg=color.bar_empty
+    )
 
     if bar_width > 0:
         console.draw_rect(
-            x=0, y=45, width=bar_width, height=1, ch=1, bg=color.bar_filled
+            x=bar_x, 
+            y=bar_y, 
+            width=bar_width, 
+            height=1, 
+            ch=1, 
+            bg=color.bar_filled
         )
 
     console.print(
-        x=1, y=45, string=f"HP: {current_value}/{maximum_value}", fg=color.bar_text
+        x=bar_x + 1, 
+        y=bar_y, 
+        string=f"HP: {current_value}/{maximum_value}", 
+        fg=color.bar_text
     )
 
 def render_dungeon_level(

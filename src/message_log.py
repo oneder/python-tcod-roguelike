@@ -3,7 +3,12 @@ import textwrap
 
 import tcod
 
+from configparser import ConfigParser
+
 import src.color as color
+
+config = ConfigParser()
+config.read("config.ini")
 
 class Message:
     def __init__(self, text: str, fg: Tuple[int, int, int]):
@@ -19,8 +24,20 @@ class Message:
         return self.plain_text
     
 class MessageLog:
-    def __init__(self) -> None:
+
+    def __init__(
+            self, 
+            x: int = 0, 
+            y: int = 0, 
+            width: int = int(config.get("GAME INFO", "SCREEN_WIDTH")), 
+            height: int = int(config.get("GAME INFO", "DEFAULT_MESSAGE_LOG_HEIGHT"))
+    ) -> None:
         self.messages: List[Message] = []
+        
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
 
     def add_message(
             self, text: str, fg: Tuple[int, int, int] = color.white, *, stack: bool = True,

@@ -88,6 +88,8 @@ class MeleeAction(ActionWithDirection):
             self.engine.message_log.add_message(
                 f"{attack_desc} but does no damage.", attack_color
             )
+        
+        self.entity.wait = self.entity.fighter.attack_speed
 
 class MovementAction(ActionWithDirection):
     def perform(self) -> None:

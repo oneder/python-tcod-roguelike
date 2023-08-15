@@ -6,6 +6,7 @@ import lzma
 import pickle
 import traceback
 from typing import Optional
+from configparser import ConfigParser
 
 import tcod
 
@@ -15,8 +16,11 @@ import src.entity_factories as entity_factories
 from src.game_map import GameWorld
 import src.input_handlers as input_handlers
 
+config = ConfigParser()
+config.read("config.ini")
+
 # load the background image and remove the alpha channel
-background_image = tcod.image.load("menu_background.png")[:, :, :3]
+background_image = tcod.image.load(config.get("GAME INFO", "MAIN_MENU_BG_PATH"))[:, :, :3]
 
 def new_game() -> Engine:
     # return a brand new game session as an Engine instance

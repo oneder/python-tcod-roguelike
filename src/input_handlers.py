@@ -137,21 +137,20 @@ class EventHandler(BaseEventHandler):
             elif self.engine.player.level.requires_level_up:
                 return LevelUpEventHandler(self.engine)
             return MainGameEventHandler(self.engine) # return to the main handler
+        
         return self
 
-    def handle_action(self, action: Optional[Action]) -> bool:
+    def handle_action(self, action: Optional[Action]) -> bool:        
         # handle actions returned from event methods
         if action is None:
             return False
-        
+            
         try:
             action.perform()
         except exceptions.Impossible as exc:
             self.engine.message_log.add_message(exc.args[0], color.impossible)
             return False
         
-        self.engine.handle_enemy_turns()
-
         self.engine.update_fov()
         return True
     
@@ -176,7 +175,10 @@ class MainGameEventHandler(EventHandler):
         ):
             return actions.TakeStairsAction(player)
 
-        if key in MOVE_KEYS:
+        if key in MOVE_KEYS:         
+            if player.wait > 0:
+                return
+                         
             dx, dy = MOVE_KEYS[key]
             action = BumpAction(player, dx, dy)
 
@@ -244,7 +246,7 @@ class HistoryViewer(EventHandler):
             log_console,
             1,
             1,
-           log_console.width - 2,
+            log_console.width - 2,
             log_console.height - 2,
             self.engine.message_log.messages[: self.cursor + 1],
         )

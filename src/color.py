@@ -8,8 +8,25 @@ needs_target = (0x3F, 0xFF, 0x3F)
 status_effect_applied = (0x3F, 0xFF, 0x3F)
 descend = (0x9F, 0x3F, 0xFF)
 
+player_alive = (255, 255, 255)
 player_die = (0xFF, 0x30, 0x30)
+
+orc_alive = (63, 127, 63)
+troll_alive = (0, 127, 0)
+
 enemy_die = (0xFF, 0xA0, 0x30)
+
+health_potion = (127, 0, 255)
+
+confusion_scroll = (207, 63, 255)
+lightning_scroll = (255, 255, 0)
+fireball_scroll = (255, 0, 0)
+
+dagger = (0, 191, 255)
+sword = (0, 191, 255)
+
+leather_armor = (139, 69, 19)
+chain_mail = ((139, 19, 19))
 
 invalid = (0xFF, 0xFF, 0x00)
 impossible = (0x80, 0x80, 0x80)

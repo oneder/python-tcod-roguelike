@@ -71,14 +71,13 @@ class Entity:
             self.parent = gamemap
             gamemap.entities.add(self)
 
-    def disatance(self, x: int, y: int) -> float:
+    def distance(self, x: int, y: int) -> float:
         # return the distance between the current entity and given (x, y) coordinate
         return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
 
     def move(self, dx: int, dy: int) -> None:
         self.x += dx
         self.y += dy
-
 
 
 class Actor(Entity):
@@ -95,6 +94,7 @@ class Actor(Entity):
             fighter: Fighter,
             inventory: Inventory,
             level: Level,
+            speed: int,
     ):
         super().__init__(
             x=x, 
@@ -119,6 +119,15 @@ class Actor(Entity):
 
         self.level = level
         self.level.parent = self
+
+        self.speed = speed
+        self.wait = 0
+
+    def move(self, dx: int, dy: int) -> None:
+        super().move(dx=dx, dy=dy)     
+
+        # whenever an actor moves, initiate wait
+        self.wait = self.speed
 
     @property
     def is_alive(self) -> bool:

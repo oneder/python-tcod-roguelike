@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING
 from tcod.console import Console
 from tcod.map import compute_fov
 
+from configparser import ConfigParser
+
 import src.exceptions as exceptions
 from src.message_log import MessageLog
 import src.render_functions as render_functions
@@ -15,14 +17,20 @@ if TYPE_CHECKING:
     from entity import Actor
     from game_map import GameMap, GameWorld
 
+config = ConfigParser()
+config.read("config.ini")
+
 class Engine:
-    FOV_RADIUS=8
+    FOV_RADIUS=int(config.get("GAME INFO", "DEFAULT_FOV_RADIUS")) 
 
     game_map: GameMap
     game_world: GameWorld
 
     def __init__(self, player: Actor):
-        self.message_log = MessageLog()
+        self.message_log = MessageLog(
+            int(config.get("GAME INFO", "MESSAGE_LOG_X")), 
+            int(config.get("GAME INFO", "MESSAGE_LOG_Y")),
+        )
         self.mouse_location = (0, 0)
         self.player = player
 
@@ -30,7 +38,10 @@ class Engine:
         for entity in set(self.game_map.actors) - {self.player}:
             if entity.ai:
                 try:
-                    entity.ai.perform()
+                    if entity.wait > 0:
+                        entity.wait -= 1
+                    else:
+                        entity.ai.perform()
                 except exceptions.Impossible:
                     pass # ignore impossible action exceptions from AI
 
@@ -48,22 +59,36 @@ class Engine:
     def render(self, console: Console) -> None:
         self.game_map.render(console)
 
-        self.message_log.render(console=console, x=21, y=45, width=40, height=5)
+        self.message_log.render(
+            console=console, 
+            x=self.message_log.x, 
+            y=self.message_log.y, 
+            width=self.message_log.width, 
+            height=self.message_log.height
+        )
 
         render_functions.render_bar(
             console=console,
             current_value=self.player.fighter.hp,
             maximum_value=self.player.fighter.max_hp,
-            total_width=20,
+            total_width=int(config.get("GAME INFO", "HP_BAR_WIDTH")),
         )
 
         render_functions.render_dungeon_level(
             console=console,
             dungeon_level=self.game_world.current_floor,
-            location=(0, 47),
+            location=(
+                int(config.get("GAME INFO", "DUNGEON_LEVEL_LBL_X")),
+                int(config.get("GAME INFO", "DUNGEON_LEVEL_LBL_Y"))    
+            ),
         )
 
-        render_functions.render_names_at_mouse_location(console=console, x=21, y=44, engine=self)
+        render_functions.render_names_at_mouse_location(
+            console=console, 
+            x=int(config.get("GAME INFO", "AT_MOUSE_LBL_X")), 
+            y=int(config.get("GAME INFO", "AT_MOUSE_LBL_Y")), 
+            engine=self
+        )
 
     def save_as(self, filename: str) -> None:
         # save this engine isntance as a compressed file
