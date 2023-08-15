@@ -25,11 +25,11 @@ player = Actor(
         hp=30, 
         base_defense=2, 
         base_power=5, 
-        base_attack_speed=int(config.get("GAME INFO", "PLAYER_ATTACK_SPEED"))
+        base_attack_speed=20
     ),
     inventory=Inventory(capacity=int(config.get("GAME INFO", "DEFAULT_INVENTORY_CAPACITY"))),
     level=Level(level_up_base=int(config.get("GAME INFO", "DEFAULT_LEVEL_UP_BASE"))),
-    speed=int(config.get("GAME INFO", "PLAYER_SPEED")),
+    speed=5,
 )
 
 orc = Actor(
@@ -42,11 +42,11 @@ orc = Actor(
         hp=10, 
         base_defense=0, 
         base_power=3, 
-        base_attack_speed=int(config.get("GAME INFO", "DEFAULT_ATTACK_SPEED"))
+        base_attack_speed=60
     ),
     inventory=Inventory(capacity=0),
     level=Level(xp_given=35),
-    speed=int(config.get("GAME INFO", "DEFAULT_SPEED")),
+    speed=30,
 )
 
 troll = Actor(
@@ -59,11 +59,11 @@ troll = Actor(
         hp=15, 
         base_defense=1, 
         base_power=4, 
-        base_attack_speed=int(config.get("GAME INFO", "DEFAULT_ATTACK_SPEED"))
+        base_attack_speed=60
     ),
     inventory=Inventory(capacity=0),
     level=Level(xp_given=100),
-    speed=int(config.get("GAME INFO", "DEFAULT_SPEED")),
+    speed=40,
 )
 
 """ POTIONS """
