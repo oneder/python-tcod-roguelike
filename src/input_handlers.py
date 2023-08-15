@@ -87,7 +87,7 @@ class BaseEventHandler(tcod.event.EventDispatch[ActionOrHandler]):
             return state
         assert not isinstance(state, Action), f"{self!r} cannot handle actions"
         return self
-    
+
     def on_render(self, console: tcod.Console) -> None:
         raise NotImplementedError()
     
@@ -154,6 +154,9 @@ class EventHandler(BaseEventHandler):
         self.engine.update_fov()
         return True
     
+    def real_time_update(self) -> None:
+        pass
+    
     def ev_mousemotion(self, event: tcod.event.MouseMotion) -> None:
         if self.engine.game_map.in_bounds(event.tile.x, event.tile.y):
             self.engine.mouse_location = event.tile.x, event.tile.y
@@ -161,7 +164,13 @@ class EventHandler(BaseEventHandler):
     def on_render(self, console: tcod.Console) -> None:
         self.engine.render(console)
     
-class MainGameEventHandler(EventHandler):    
+class MainGameEventHandler(EventHandler):  
+    def real_time_update(self) -> None:
+        if self.engine.player.wait > 0:
+            self.engine.player.wait -= 1
+            
+        self.engine.handle_enemy_turns()
+
     def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[ActionOrHandler]:
         action: Optional[Action] = None
 

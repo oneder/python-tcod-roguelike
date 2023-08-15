@@ -10,6 +10,8 @@ import src.exceptions as exceptions
 import src.input_handlers as input_handlers
 import src.setup_game as setup_game
 
+FPS = 1/60
+
 config = ConfigParser()
 config.read("config.ini")
 
@@ -50,14 +52,11 @@ def main():
                     for event in tcod.event.get():
                         context.convert_event(event)
                         handler = handler.handle_events(event)
-                    
-                    if isinstance(handler, input_handlers.EventHandler):
-                        if handler.engine.player.wait > 0:
-                            handler.engine.player.wait -= 1
-                            
-                        handler.engine.handle_enemy_turns()
 
-                    time.sleep(1/60)
+                    if isinstance(handler, input_handlers.EventHandler):
+                        handler.real_time_update()
+
+                    time.sleep(FPS)
                 except Exception: # handle exceptions in game
                     traceback.print_exc() # print error to stderr
 
