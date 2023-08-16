@@ -15,6 +15,7 @@ from src.engine import Engine
 import src.entity_factories as entity_factories
 from src.game_map import GameWorld
 import src.input_handlers as input_handlers
+import src.constants as constants
 
 config = ConfigParser()
 config.read("config.ini")
@@ -73,56 +74,145 @@ def load_game(filename: str) -> Engine:
     return engine
 
 class MainMenu(input_handlers.BaseEventHandler):
-    # handle the main menu rendering and input
+    menu_items = ["New Game", "Continue Last Game", "Quit"]
+    current_index = 0
 
+    # handle the main menu rendering and input
     def on_render(self, console: tcod.Console) -> None:
         # render the main menu on a background image
-        console.draw_semigraphics(background_image, 0, 0)
+        # console.draw_semigraphics(background_image, 0, 0)
+
+        console.draw_frame(1, 1, console.width-2, console.height-2)
 
         console.print(
             console.width // 2,
             console.height // 2 - 4,
-            "TOMBS OF THE ANCIENT KINGS",
+            config.get("GAME INFO", "TITLE"),
             fg=color.menu_title,
             alignment=tcod.CENTER,
         )
 
-        console.print(
-            console.width // 2,
-            console.height - 2,
-            "By oneder",
-            fg=color.menu_title,
-            alignment=tcod.CENTER,
+        console.print_box(
+            0, console.height - 2, console.width, 1, "┤ BY ONEDER ├", alignment=tcod.CENTER
         )
 
-        menu_width = 24
-        for i, text in enumerate(
-            ["[N] Play a new game", "[C] Continue last game", "[Q] Quit"]
-        ):
+        menu_width = 18
+        for i, text in enumerate(self.menu_items):
+            menu_item_color = color.menu_text
+            if self.current_index == i:
+                menu_item_color = color.selected_menu_text
+
             console.print(
                 console.width // 2,
                 console.height // 2 - 2 + i,
                 text.ljust(menu_width),
-                fg=color.menu_text,
+                fg=menu_item_color,
                 bg=color.black,
                 alignment=tcod.CENTER,
                 bg_blend=tcod.BKGND_ALPHA(64),
             )
+        
+        console.print(
+            (console.width // 4) * 3,
+            console.height // 2 - 2 + self.current_index,
+            string="<"
+        )
 
     def ev_keydown(
         self, event: tcod.event.KeyDown
     ) -> Optional[input_handlers.BaseEventHandler]:
-        if event.sym in (tcod.event.K_q, tcod.event.K_ESCAPE):
+        if event.sym == tcod.event.K_ESCAPE:
             raise SystemExit()
-        elif event.sym == tcod.event.K_c:
+        elif event.sym in constants.CONFIRM_KEYS or event.sym == tcod.event.K_x:
             try:
-                return input_handlers.MainGameEventHandler(load_game("savegame.sav"))
+                if self.current_index == 0:
+                    return CharacterSelect()
+                elif self.current_index == 1:
+                    return input_handlers.MainGameEventHandler(load_game("savegame.sav"))
+                elif self.current_index == 2:
+                    raise SystemExit()                       
             except FileNotFoundError:
                 return input_handlers.PopupMessage(self, "No saved game to load.")
             except Exception as exc:
                 traceback.print_exc() # print to stderr
                 return input_handlers.PopupMessage(self, f"Failed to load save:\n{exc}")
-        elif event.sym == tcod.event.K_n:
+                    
+        return None
+    
+    def ev_keyup(
+        self, event: tcod.event.KeyUp
+    ) -> Optional[input_handlers.BaseEventHandler]:
+        if event.sym == tcod.event.K_UP:
+            if self.current_index == 0:
+                self.current_index = len(self.menu_items) - 1
+            else:
+                self.current_index -= 1
+        elif event.sym == tcod.event.K_DOWN:
+            if self.current_index == len(self.menu_items) - 1:
+                self.current_index = 0
+            else:
+                self.current_index += 1
+
+        return None
+    
+class CharacterSelect(input_handlers.BaseEventHandler):
+    class_items = ["Human", "Mech", "Fungus"]
+    current_class = 0
+
+    # handle the main menu rendering and input
+    def on_render(self, console: tcod.Console) -> None:
+        console.draw_frame(1, 1, console.width-2, console.height-2)
+
+        console.print(
+            console.width // 2,
+            console.height // 5,
+            "Character Select:",
+            fg=color.menu_title,
+            alignment=tcod.CENTER,
+        )
+
+        console.print(console.width // 4, console.height // 3, "Class:", fg=color.white)
+        for i, text in enumerate(self.class_items):
+            class_item_color = color.menu_text
+            if self.current_class == i:
+                class_item_color = color.selected_menu_text
+
+            console.print(                
+                console.width // 4 + 4,
+                console.height // 3 + (i + 1),
+                text,
+                fg=class_item_color,
+            )
+        
+        
+        console.print(
+            console.width // 4,
+            console.height // 3 +(1 + self.current_class),
+            string=">"
+        )
+    
+    def ev_keydown(
+        self, event: tcod.event.KeyDown
+    ) -> Optional[input_handlers.BaseEventHandler]:
+        if event.sym in (tcod.event.K_q, tcod.event.K_ESCAPE):
+            return MainMenu()
+        elif event.sym in constants.CONFIRM_KEYS or event.sym == tcod.event.K_x:
             return input_handlers.MainGameEventHandler(new_game())
         
+        return None
+    
+    def ev_keyup(
+        self, event: tcod.event.KeyUp
+    ) -> Optional[input_handlers.BaseEventHandler]:
+        if event.sym == tcod.event.K_UP:
+            if self.current_class == 0:
+                self.current_class = len(self.class_items) - 1
+            else:
+                self.current_class -= 1
+        elif event.sym == tcod.event.K_DOWN:
+            if self.current_class == len(self.class_items) - 1:
+                self.current_class = 0
+            else:
+                self.current_class += 1
+
         return None

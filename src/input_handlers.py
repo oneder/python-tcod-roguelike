@@ -17,58 +17,11 @@ from src.actions import (
 )
 import src.color as color
 import src.exceptions as exceptions
+import src.constants as constants
 
 if TYPE_CHECKING:
     from engine import Engine
     from entity import Item
-
-MOVE_KEYS = {
-    # Arrow keys.
-    tcod.event.K_UP: (0, -1),
-    tcod.event.K_DOWN: (0, 1),
-    tcod.event.K_LEFT: (-1, 0),
-    tcod.event.K_RIGHT: (1, 0),
-    tcod.event.K_HOME: (-1, -1),
-    tcod.event.K_END: (-1, 1),
-    tcod.event.K_PAGEUP: (1, -1),
-    tcod.event.K_PAGEDOWN: (1, 1),
-    # Numpad keys.
-    tcod.event.K_KP_1: (-1, 1),
-    tcod.event.K_KP_2: (0, 1),
-    tcod.event.K_KP_3: (1, 1),
-    tcod.event.K_KP_4: (-1, 0),
-    tcod.event.K_KP_6: (1, 0),
-    tcod.event.K_KP_7: (-1, -1),
-    tcod.event.K_KP_8: (0, -1),
-    tcod.event.K_KP_9: (1, -1),
-    # Vi keys.
-    tcod.event.K_h: (-1, 0),
-    tcod.event.K_j: (0, 1),
-    tcod.event.K_k: (0, -1),
-    tcod.event.K_l: (1, 0),
-    tcod.event.K_y: (-1, -1),
-    tcod.event.K_u: (1, -1),
-    tcod.event.K_b: (-1, 1),
-    tcod.event.K_n: (1, 1),
-}
-
-WAIT_KEYS = {
-    tcod.event.K_PERIOD,
-    tcod.event.K_KP_5,
-    tcod.event.K_CLEAR,
-}
-
-CONFIRM_KEYS = {
-    tcod.event.K_RETURN,
-    tcod.event.K_KP_ENTER,
-}
-
-CURSOR_Y_KEYS = {
-    tcod.event.K_UP: -1,
-    tcod.event.K_DOWN: 1,
-    tcod.event.K_PAGEUP: -10,
-    tcod.event.K_PAGEDOWN: 10,
-}
 
 ActionOrHandler = Union[Action, "BaseEventHandler"]
 
@@ -184,14 +137,14 @@ class MainGameEventHandler(EventHandler):
         ):
             return actions.TakeStairsAction(player)
 
-        if key in MOVE_KEYS:         
+        if key in constants.MOVE_KEYS:         
             if player.wait > 0:
                 return
                          
-            dx, dy = MOVE_KEYS[key]
+            dx, dy = constants.MOVE_KEYS[key]
             action = BumpAction(player, dx, dy)
 
-        elif key in WAIT_KEYS:
+        elif key in constants.WAIT_KEYS:
             action = WaitAction(player)
 
         elif key == tcod.event.K_ESCAPE:
@@ -263,8 +216,8 @@ class HistoryViewer(EventHandler):
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[MainGameEventHandler]:
         # Fancy conditional movement to make it feel right.
-        if event.sym in CURSOR_Y_KEYS:
-            adjust = CURSOR_Y_KEYS[event.sym]
+        if event.sym in constants.CURSOR_Y_KEYS:
+            adjust = constants.CURSOR_Y_KEYS[event.sym]
             if adjust < 0 and self.cursor == 0:
                 # Only move from the top to the bottom when you're on the edge.
                 self.cursor = self.log_length - 1
@@ -531,7 +484,7 @@ class SelectIndexHandler(AskUserEventHandler):
     def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[ActionOrHandler]:
         # check for key movement or confirmation keys
         key = event.sym
-        if key in MOVE_KEYS:
+        if key in constants.MOVE_KEYS:
             modifier = 1 # holding modifier keys will speed up key movement
             if event.mod & (tcod.event.KMOD_LSHIFT | tcod.event.KMOD_RSHIFT):
                 modifier *= 5
@@ -541,7 +494,7 @@ class SelectIndexHandler(AskUserEventHandler):
                 modifier *= 20
 
             x, y = self.engine.mouse_location
-            dx, dy = MOVE_KEYS[key]
+            dx, dy = constants.MOVE_KEYS[key]
             x += dx * modifier
             y += dy * modifier
             # clamp the cursor index to the map size
@@ -549,7 +502,7 @@ class SelectIndexHandler(AskUserEventHandler):
             y = max(0, min(y, self.engine.game_map.height - 1))
             self.engine.mouse_location = x, y
             return None
-        elif key in CONFIRM_KEYS:
+        elif key in constants.CONFIRM_KEYS:
             return self.on_index_selected(*self.engine.mouse_location)
         return super().ev_keydown(event)
     

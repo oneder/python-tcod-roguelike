@@ -70,7 +70,7 @@ def main():
         except SystemExit: # save and quit
             save_game(handler, "savegame.sav")
             raise
-        except BaseException: # svae on any other unexpected exception
+        except BaseException: # save on any other unexpected exception
             save_game(handler, "savegame.sav")
             raise
 
