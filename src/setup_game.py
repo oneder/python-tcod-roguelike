@@ -23,7 +23,7 @@ config.read("config.ini")
 # load the background image and remove the alpha channel
 background_image = tcod.image.load(config.get("GAME INFO", "MAIN_MENU_BG_PATH"))[:, :, :3]
 
-def new_game() -> Engine:
+def new_game(character_cls: str) -> Engine:
     # return a brand new game session as an Engine instance
     map_width = 80
     map_height = 43
@@ -32,7 +32,7 @@ def new_game() -> Engine:
     room_min_size = 6
     max_rooms = 30
 
-    player = copy.deepcopy(entity_factories.player)
+    player = entity_factories.get_player(character_cls)
 
     engine = Engine(player=player)
 
@@ -59,10 +59,10 @@ def new_game() -> Engine:
     leather_armor.parent = player.inventory
 
     player.inventory.items.append(dagger)
-    player.equipment.toggle_equip(dagger, add_message=False)
+    #player.equipment.toggle_equip(dagger, add_message=False)
 
     player.inventory.items.append(leather_armor)
-    player.equipment.toggle_equip(leather_armor, add_message=False)
+    #player.equipment.toggle_equip(leather_armor, add_message=False)
 
     return engine
 
@@ -156,7 +156,12 @@ class MainMenu(input_handlers.BaseEventHandler):
         return None
     
 class CharacterSelect(input_handlers.BaseEventHandler):
-    class_items = ["Human", "Mech", "Fungus"]
+    class_items = [
+        constants.ENTITY_PLAYER_TYPE_HUMAN, 
+        constants.ENTITY_PLAYER_TYPE_MECH,
+        constants.ENTITY_PLAYER_TYPE_FUNGUS,
+    ]
+
     current_class = 0
 
     # handle the main menu rendering and input
@@ -182,8 +187,7 @@ class CharacterSelect(input_handlers.BaseEventHandler):
                 console.height // 3 + (i + 1),
                 text,
                 fg=class_item_color,
-            )
-        
+            )       
         
         console.print(
             console.width // 4,
@@ -197,7 +201,7 @@ class CharacterSelect(input_handlers.BaseEventHandler):
         if event.sym in (tcod.event.K_q, tcod.event.K_ESCAPE):
             return MainMenu()
         elif event.sym in constants.CONFIRM_KEYS or event.sym == tcod.event.K_x:
-            return input_handlers.MainGameEventHandler(new_game())
+            return input_handlers.MainGameEventHandler(new_game(self.class_items[self.current_class]))
         
         return None
     

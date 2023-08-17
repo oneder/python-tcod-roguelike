@@ -15,9 +15,12 @@ from src.actions import (
      PickupAction,
      WaitAction
 )
+
 import src.color as color
 import src.exceptions as exceptions
 import src.constants as constants
+
+from src.entity import Player
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -269,9 +272,9 @@ class CharacterScreenEventHandler(AskUserEventHandler):
         if self.engine.player.x <= 30:
             x = 40
         else:
-            x = 0
+            x = 1
 
-        y = 0
+        y = 1
 
         width = len(self.TITLE) + 4
 
@@ -279,30 +282,35 @@ class CharacterScreenEventHandler(AskUserEventHandler):
             x=x,
             y=y,
             width=width,
-            height=7,
+            height=8,
             title=self.TITLE,
             clear=True,
             fg=(255, 255, 255),
             bg=(0, 0, 0),
         )
 
+        if isinstance(self.engine.player, Player):
+            console.print(
+                x=x + 1, y=y + 1, string=f"Class: {self.engine.player.character_cls}"
+            )
+
         console.print(
-            x=x + 1, y=y + 1, string=f"Level: {self.engine.player.level.current_level}"
+            x=x + 1, y=y + 2, string=f"Level: {self.engine.player.level.current_level}"
         )
         console.print(
-            x=x + 1, y=y + 2, string=f"XP: {self.engine.player.level.current_xp}"
+            x=x + 1, y=y + 3, string=f"XP: {self.engine.player.level.current_xp}"
         )
         console.print(
             x=x + 1,
-            y=y + 3,
+            y=y + 4,
             string=f"XP for next level: {self.engine.player.level.experience_to_next_level}",
         )
 
         console.print(
-            x=x + 1, y=y + 4, string=f"Attack: {self.engine.player.fighter.power}"
+            x=x + 1, y=y + 5, string=f"Attack: {self.engine.player.fighter.power}"
         )
         console.print(
-            x=x + 1, y=y + 5, string=f"Defense: {self.engine.player.fighter.defense}"
+            x=x + 1, y=y + 6, string=f"Defense: {self.engine.player.fighter.defense}"
         )
 
 class LevelUpEventHandler(AskUserEventHandler):

@@ -1,36 +1,35 @@
 from configparser import ConfigParser
 
+from typing import Optional
+
 from src.components.ai import HostileEnemy
 from src.components import consumable, equipable
 from src.components.equipment import Equipment
 from src.components.fighter import Fighter
 from src.components.inventory import Inventory
 from src.components.level import Level
-from src.entity import Actor, Item
+from src.entity import Actor, Player, Item
 
 import src.color as color
+import src.constants as constants
 
 config = ConfigParser()
 config.read("config.ini")
 
 """ ACTORS """
 
-player = Actor(
-    char="@",
-    color=color.player_alive,
-    name="Player",
-    ai_cls=HostileEnemy,
-    equipment=Equipment(),
-    fighter=Fighter(
-        hp=30, 
-        base_defense=2, 
-        base_power=5, 
-        base_attack_speed=20
-    ),
-    inventory=Inventory(capacity=int(config.get("GAME INFO", "DEFAULT_INVENTORY_CAPACITY"))),
-    level=Level(level_up_base=int(config.get("GAME INFO", "DEFAULT_LEVEL_UP_BASE"))),
-    speed=5,
-)
+def get_player(character_cls: str) -> Optional[Player]:
+    if len(character_cls) > 0:
+        return Player(
+            char="@",
+            color=constants.ENTITY_PLAYER_DEFAULT_COLOR,
+            name="Player",
+            ai_cls=HostileEnemy,
+            equipment=Equipment(),
+            character_cls=character_cls
+        )        
+
+    return None
 
 orc = Actor(
     char="o", 
